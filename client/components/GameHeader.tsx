@@ -156,3 +156,4 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
     </header>
   );
 };
+

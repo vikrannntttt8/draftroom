@@ -606,3 +606,4 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     </div>
   );
 };
+

@@ -6,7 +6,12 @@ const WORD_BANK = {
     'moon', 'star', 'cup', 'hat', 'shoe', 'clock', 'door', 'bed', 'bird', 'boat',
     'cake', 'chair', 'duck', 'egg', 'frog', 'hand', 'key', 'leaf', 'milk', 'nose',
     'pen', 'ring', 'sock', 'table', 'bell', 'cloud', 'drum', 'fork', 'gate', 'kite',
-    'lamp', 'nest', 'pizza', 'rain', 'ship', 'tent', 'wall', 'eye', 'smile', 'flower'
+    'lamp', 'nest', 'pizza', 'rain', 'ship', 'tent', 'wall', 'eye', 'smile', 'flower',
+    'banana', 'cookie', 'brush', 'spoon', 'bone', 'heart', 'shirt', 'pants', 'candy',
+    'flag', 'grass', 'lion', 'bear', 'mouse', 'snake', 'rabbit',
+    'spider', 'turtle', 'pencil', 'box', 'window', 'ladder', 'broom', 'balloon', 'coin',
+    'crown', 'fire', 'water', 'sand', 'snow', 'boot', 'glove', 'scarf',
+    'train', 'bus', 'truck', 'plane', 'bike', 'wheel', 'road', 'hill', 'river', 'bridge'
   ],
   default: [
     'airplane', 'anchor', 'backpack', 'banana', 'bicycle', 'bridge', 'butterfly',
@@ -16,15 +21,36 @@ const WORD_BANK = {
     'mailbox', 'mermaid', 'microscope', 'mountain', 'octopus', 'paintbrush', 'parachute',
     'penguin', 'pirate', 'popcorn', 'rainbow', 'rocket', 'sandwich', 'scarecrow', 'scissors',
     'skateboard', 'snowman', 'spider web', 'submarine', 'telescope', 'treasure map',
-    'umbrella', 'volcano', 'windmill', 'wizard', 'zebra', 'astronaut', 'hot dog', 'roller coaster'
+    'umbrella', 'volcano', 'windmill', 'wizard', 'zebra', 'astronaut', 'hot dog', 'roller coaster',
+    'accordion', 'alien', 'alligator', 'ambulance', 'aquarium', 'archery', 'armchair',
+    'badminton', 'bakery', 'barbecue', 'baseball', 'basketball', 'battleship', 'beehive',
+    'binoculars', 'boomerang', 'bowling', 'cactus', 'calculator', 'campfire', 'canoe',
+    'carousel', 'caterpillar', 'chameleon', 'champagne', 'chess', 'chimney', 'cinnamon roll',
+    'clown', 'coffee maker', 'detective', 'diving board', 'doughnut', 'dumbbell', 'easel',
+    'electric guitar', 'escalator', 'flamingo', 'fountain', 'geyser', 'glacier', 'golf cart',
+    'graffiti', 'harmonica', 'hedgehog', 'horseshoe', 'hot air balloon', 'hourglass', 'igloo',
+    'jack-o-lantern', 'kaleidoscope', 'koala', 'lawnmower', 'leprechaun', 'limousine',
+    'lobster', 'locomotive', 'magic wand', 'magnet', 'marshmallow', 'megaphone', 'meteor',
+    'motorcycle', 'mummy', 'origami', 'ostrich', 'pancake', 'peacock', 'platypus', 'polar bear',
+    'potion', 'pretzel', 'puppet', 'radar', 'radio', 'safari', 'sandcastle', 'saxophone',
+    'satellite', 'scuba diver', 'seahorse', 'seesaw', 'sloth', 'snorkel', 'stethoscope',
+    'sunflower', 'surfboard', 'sushi', 'sword', 'tamale', 'teapot', 'toaster', 'tornado',
+    'traffic light', 'trampoline', 'treasure chest', 'tuba', 'unicycle', 'vampire', 'waffle',
+    'walrus', 'waterfall', 'werewolf', 'wheelbarrow', 'yo-yo', 'zeppelin', 'zombie'
   ],
   hard: [
     'black hole', 'time travel', 'constellation', 'evolution', 'photosynthesis',
     'gravity', 'parallel universe', 'labyrinth', 'hologram', 'solar eclipse',
     'superhero', 'hypnosis', 'whirlpool', 'metamorphosis', 'archaeology',
-    'hibernation', 'avalanche', 'mirage', 'chameleon', 'sandstorm', 'constellation',
-    'mona lisa', 'bermuda triangle', 'roller coaster', 'quicksand', 'thunderstorm',
-    'cryptocurrency', 'teleportation', 'deep sea', 'fossil fuel', 'renaissance'
+    'hibernation', 'avalanche', 'mirage', 'sandstorm',
+    'mona lisa', 'bermuda triangle', 'quicksand', 'thunderstorm',
+    'cryptocurrency', 'teleportation', 'deep sea', 'fossil fuel', 'renaissance',
+    'artificial intelligence', 'quantum entanglement', 'silent disco', 'schrodinger cat',
+    'optical illusion', 'existential crisis', 'déjà vu', 'food chain', 'plate tectonics',
+    'virtual reality', 'haunted mansion', 'solar flare', 'supernova', 'crop circle',
+    'golden ratio', 'abominable snowman', 'fata morgana', 'turing test', 'escape room',
+    'sound barrier', 'subconscious', 'brainstorm', 'fossilization', 'doppelganger',
+    'speed of light', 'space elevator', 'butterfly effect', 'pandora box', 'terraforming'
   ]
 };
 

@@ -395,3 +395,4 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({ value, onChange }) =
     </div>
   );
 };
+

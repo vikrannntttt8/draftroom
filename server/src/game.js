@@ -2,6 +2,7 @@ const {
   generateRoomCode,
   normalizeText,
   levenshteinDistance,
+  checkWordMatch,
   sanitizeNickname,
   createWordMask,
   getWordLengths
@@ -15,9 +16,76 @@ class GameManager {
     this.socketToRoom = new Map(); // socketId -> roomCode
     this.socketToPlayer = new Map(); // socketId -> playerId
     this.rateLimits = new Map(); // socketId -> { strokeCount, chatCount, lastReset }
+    this.eventLogs = []; // ring-buffer of last 100 events
 
     // Run cleanup sweeper every 60s
     this.sweeperInterval = setInterval(() => this.sweepRooms(), 60000);
+  }
+
+  logEvent(roomCode, type, message) {
+    const entry = {
+      id: `evt_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      ts: Date.now(),
+      roomCode,
+      type,
+      message
+    };
+    this.eventLogs.unshift(entry);
+    if (this.eventLogs.length > 100) this.eventLogs.pop();
+  }
+
+  getDebugStats() {
+    const roomsList = [];
+    let totalPlayers = 0;
+    for (const [code, room] of this.rooms.entries()) {
+      const playersList = Array.from(room.players.values()).map(p => ({
+        id: p.id,
+        nickname: p.nickname,
+        avatar: p.avatar,
+        score: p.score,
+        turnScore: p.turnScore,
+        hasGuessed: p.hasGuessed,
+        connected: p.connected
+      }));
+      totalPlayers += playersList.length;
+
+      const drawer = room.drawerId ? room.players.get(room.drawerId) : null;
+      const host = room.players.get(room.hostId);
+
+      roomsList.push({
+        code,
+        state: room.state,
+        host: host ? host.nickname : 'Unknown',
+        hostId: room.hostId,
+        round: room.round,
+        totalRounds: room.settings.rounds,
+        drawer: drawer ? drawer.nickname : null,
+        currentWord: room.currentWord,
+        wordMask: room.currentWord ? createWordMask(room.currentWord, room.revealedIndexes) : '',
+        turnEndsAt: room.turnEndsAt,
+        playersCount: playersList.length,
+        maxPlayers: room.settings.maxPlayers,
+        drawTime: room.settings.drawTime,
+        canvasOps: room.canvasHistory.length,
+        players: playersList,
+        createdAt: room.createdAt,
+        lastActivityAt: room.lastActivityAt
+      });
+    }
+
+    return {
+      serverTime: Date.now(),
+      uptime: Math.floor(process.uptime()),
+      memory: {
+        rssMB: (process.memoryUsage().rss / (1024 * 1024)).toFixed(1),
+        heapUsedMB: (process.memoryUsage().heapUsed / (1024 * 1024)).toFixed(1)
+      },
+      activeRoomsCount: this.rooms.size,
+      totalPlayersCount: totalPlayers,
+      connectedSocketsCount: this.socketToRoom.size,
+      rooms: roomsList,
+      recentEvents: this.eventLogs.slice(0, 50)
+    };
   }
 
   // --- Rate limiting ---
@@ -157,6 +225,7 @@ class GameManager {
     this.socketToPlayer.set(socket.id, playerId);
     socket.join(code);
 
+    this.logEvent(code, 'ROOM_CREATE', `Room ${code} created by ${player.nickname}`);
     this.sendRoomState(socket, room, playerId);
   }
 
@@ -267,6 +336,7 @@ class GameManager {
     this.sendRoomState(socket, room, playerId);
     socket.to(code).emit('room:player_joined', { player: this.sanitizePlayer(newPlayer) });
 
+    this.logEvent(code, 'PLAYER_JOIN', `${newPlayer.nickname} joined room ${code}`);
     this.broadcastSystemMessage(room, `${newPlayer.nickname} joined the room.`);
 
     // If game is in DRAWING state, send canvas history to new player
@@ -400,6 +470,7 @@ class GameManager {
     room.usedWords.clear();
     room.lastActivityAt = Date.now();
 
+    this.logEvent(room.code, 'GAME_START', `Game started in room ${room.code} (${room.settings.rounds} rounds)`);
     this.broadcastSystemMessage(room, `Game started! Round 1 of ${room.settings.rounds}.`);
     this.startWordSelection(room);
   }
@@ -483,6 +554,7 @@ class GameManager {
     const drawTimeMs = room.settings.drawTime * 1000;
     room.turnEndsAt = Date.now() + drawTimeMs;
 
+    this.logEvent(room.code, 'WORD_SELECT', `${room.players.get(drawerId)?.nickname || 'Drawer'} selected "${word}"`);
     this.broadcastStateChange(room);
     this.broadcastSystemMessage(room, `${room.players.get(drawerId)?.nickname} is drawing now! Start guessing!`);
 
@@ -662,8 +734,8 @@ class GameManager {
     const normalizedInput = normalizeText(rawText);
     const normalizedTarget = normalizeText(room.currentWord);
 
-    // Check exact match
-    if (normalizedInput === normalizedTarget) {
+    // Check exact or plural/singular match
+    if (checkWordMatch(rawText, room.currentWord)) {
       // Exact Match!
       player.hasGuessed = true;
       player.guessedAt = Date.now();
@@ -1050,3 +1122,4 @@ class GameManager {
 }
 
 module.exports = GameManager;
+

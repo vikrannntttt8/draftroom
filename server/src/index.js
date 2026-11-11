@@ -5,6 +5,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const GameManager = require('./game');
+const { renderDashboardHtml } = require('./dashboard');
 const {
   RoomCreateSchema,
   RoomJoinSchema,
@@ -21,17 +22,10 @@ const server = http.createServer(app);
 
 const PORT = process.env.PORT || 4000;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || '*';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 app.use(cors({ origin: CLIENT_ORIGIN, credentials: true }));
 app.use(express.json());
-
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    uptime: process.uptime(),
-    timestamp: Date.now()
-  });
-});
 
 const io = new Server(server, {
   cors: {
@@ -44,6 +38,42 @@ const io = new Server(server, {
 });
 
 const gameManager = new GameManager(io);
+
+// Live Observer Web Dashboard on http://localhost:4000
+app.get('/', (req, res) => {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(renderDashboardHtml(FRONTEND_URL));
+});
+
+// JSON API endpoint for server & room observability
+app.get('/api/status', (req, res) => {
+  res.json(gameManager.getDebugStats());
+});
+
+app.get('/api/rooms/:code', (req, res) => {
+  const room = gameManager.getRoom(req.params.code);
+  if (!room) {
+    return res.status(404).json({ error: 'Room not found' });
+  }
+  res.json({
+    code: room.code,
+    hostId: room.hostId,
+    state: room.state,
+    round: room.round,
+    drawerId: room.drawerId,
+    currentWord: room.currentWord,
+    canvasOps: room.canvasHistory.length,
+    players: Array.from(room.players.values()).map(p => gameManager.sanitizePlayer(p))
+  });
+});
+
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: Date.now()
+  });
+});
 
 io.on('connection', (socket) => {
   // Helper for Zod validation
@@ -132,3 +162,4 @@ io.on('connection', (socket) => {
 server.listen(PORT, () => {
   console.log(`[DraftRoom Server] Listening on port ${PORT}`);
 });
+

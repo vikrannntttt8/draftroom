@@ -17,11 +17,21 @@ const {
   ChatGuessSchema
 } = require('../src/schemas');
 
+const { renderDashboardHtml } = require('../src/dashboard');
+
 function createTestServer() {
   const app = express();
   const server = http.createServer(app);
   const io = new Server(server, { cors: { origin: '*' } });
   const gameManager = new GameManager(io);
+
+  app.get('/', (req, res) => {
+    res.send(renderDashboardHtml());
+  });
+
+  app.get('/api/status', (req, res) => {
+    res.json(gameManager.getDebugStats());
+  });
 
   io.on('connection', (socket) => {
     socket.on('room:create', (data) => gameManager.createRoom(socket, data));
@@ -215,9 +225,23 @@ test('End-to-End Game Lifecycle: Create, Join, Settings, Draw, Guess, Score, Tal
   assert.strictEqual(correctMsg.kind, 'guessed');
   assert.ok(correctMsg.scoreDelta > 0, 'Score delta awarded');
 
+  // 9. Verify Backend Observer Dashboard & API
+  const dashboardRes = await fetch(url + '/');
+  assert.strictEqual(dashboardRes.status, 200);
+  const dashboardHtml = await dashboardRes.text();
+  assert.ok(dashboardHtml.includes('DRAFTROOM'), 'Dashboard includes brand title');
+
+  const statusRes = await fetch(url + '/api/status');
+  assert.strictEqual(statusRes.status, 200);
+  const statusJson = await statusRes.json();
+  assert.strictEqual(statusJson.activeRoomsCount, 1);
+  assert.strictEqual(statusJson.rooms[0].code, roomCode);
+  assert.ok(statusJson.recentEvents.length > 0, 'Recent events logged');
+
   // Cleanup
   client1.disconnect();
   client2.disconnect();
   clearInterval(gameManager.sweeperInterval);
   await new Promise((resolve) => server.close(resolve));
 });
+

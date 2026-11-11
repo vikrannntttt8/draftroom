@@ -32,3 +32,4 @@ test('getRandomWords returns requested number of unique words', () => {
   assert.strictEqual(words.length, 3);
   assert.strictEqual(new Set(words).size, 3);
 });
+

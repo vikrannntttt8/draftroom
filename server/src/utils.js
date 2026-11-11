@@ -101,11 +101,27 @@ function getWordLengths(word) {
   return word.split(' ').map(w => w.length);
 }
 
+function checkWordMatch(guess, target) {
+  const normGuess = normalizeText(guess);
+  const normTarget = normalizeText(target);
+  if (!normGuess || !normTarget) return false;
+
+  // Exact match
+  if (normGuess === normTarget) return true;
+
+  // Simple plural / singular variants (e.g. cat/cats, apple/apples, box/boxes)
+  if (normGuess + 's' === normTarget || normTarget + 's' === normGuess) return true;
+  if (normGuess + 'es' === normTarget || normTarget + 'es' === normGuess) return true;
+
+  return false;
+}
+
 module.exports = {
   CODE_CHARS,
   generateRoomCode,
   normalizeText,
   levenshteinDistance,
+  checkWordMatch,
   isProfane,
   sanitizeNickname,
   createWordMask,
